@@ -5,12 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Love Page</title>
     <style>
-        /* Your existing CSS goes here */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background-color: black;
+            color: white;
+            font-family: 'Arial', sans-serif;
+        }
+
+        video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .content {
+            text-align: center;
+            z-index: 1;
+            animation: fadeIn 2s ease;
+        }
+
+        button {
+            background-color: #ff4d4d;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            color: white;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            background-color: #ff6666;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
     <video autoplay loop muted>
-        <source src="LOVE HEART TUNNEL.mp4" type="video/mp4">
+        <source src="LOVE_HEART_TUNNEL.mp4" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 
@@ -30,8 +88,8 @@
         <!-- Questions -->
         <div id="questions" style="display: none;">
             <h1 id="question-text">Do you want to be with me forever?</h1>
-            <button onclick="nextQuestion('Yes')">Yes</button>
-            <button onclick="nextQuestion('No')">No</button>
+            <button onclick="nextQuestion()">Yes</button>
+            <button onclick="nextQuestion()">No</button>
         </div>
 
         <!-- Continue Question -->
@@ -49,25 +107,7 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js"></script>
-
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCyfke2ZHGhZ_X5BKR9gxYvMmZYlW7iBFc",
-            authDomain: "test-for-you-a64af.firebaseapp.com",
-            projectId: "test-for-you-a64af",
-            storageBucket: "test-for-you-a64af.firebasestorage.app",
-            messagingSenderId: "986746967380",
-            appId: "1:986746967380:web:37f7f3465857174674a4c1",
-            measurementId: "G-3D56LTMCQD"
-        };
-
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(app);
-
         let questionIndex = 0;
         const questions = [
             "Do you want to be with me forever?",
@@ -76,19 +116,6 @@
             "Do you love me more than anyone else?",
             "Will you stay with me no matter what?"
         ];
-
-        let answers = [];
-
-        // Function to save answers to Firestore
-        function saveData(data) {
-            db.collection("responses").add(data)
-                .then(() => {
-                    console.log("Data saved successfully!");
-                })
-                .catch((error) => {
-                    console.error("Error saving data: ", error);
-                });
-        }
 
         function goToStart() {
             document.getElementById('mobile-question').style.display = 'none';
@@ -110,8 +137,7 @@
             }
         }
 
-        function nextQuestion(answer) {
-            answers.push({ question: questions[questionIndex], answer: answer });
+        function nextQuestion() {
             questionIndex++;
             updateQuestion();
         }
@@ -123,14 +149,6 @@
 
         function submitFeedback() {
             const feedback = document.getElementById('feedback').value;
-            answers.push({ question: "Feedback", answer: feedback });
-
-            // Save all answers and feedback to Firestore
-            saveData({
-                responses: answers,
-                timestamp: new Date()
-            });
-
             alert('Thank you for your message: ' + feedback);
             closeSite();
         }
