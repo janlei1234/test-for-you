@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Love Page</title>
+    <style>
+        /* Your existing CSS goes here */
+    </style>
+</head>
+<body>
+    <video autoplay loop muted>
+        <source src="LOVE HEART TUNNEL.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="content" id="main-content">
+        <!-- Initial Question -->
+        <div id="mobile-question">
+            <h1>Are you on mobile?</h1>
+            <button onclick="goToStart()">Yes</button>
+            <button onclick="goToStart()">No</button>
+        </div>
+
+        <!-- Start Button -->
+        <div id="start-button" style="display: none;">
+            <button onclick="startQuestions()">Start</button>
+        </div>
+
+        <!-- Questions -->
+        <div id="questions" style="display: none;">
+            <h1 id="question-text">Do you want to be with me forever?</h1>
+            <button onclick="nextQuestion('Yes')">Yes</button>
+            <button onclick="nextQuestion('No')">No</button>
+        </div>
+
+        <!-- Continue Question -->
+        <div id="continue-question" style="display: none;">
+            <h1>Do you want to continue?</h1>
+            <button onclick="goToFeedback()">Yes</button>
+            <button onclick="closeSite('Oh, you gave up already :(')">No</button>
+        </div>
+
+        <!-- Feedback Section -->
+        <div id="feedback-section" style="display: none;">
+            <h2>You can say whatever you want to me, and I'll read it when you're done!</h2>
+            <input type="text" id="feedback" placeholder="Type your message here...">
+            <button onclick="submitFeedback()">Submit</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyfke2ZHGhZ_X5BKR9gxYvMmZYlW7iBFc",
+            authDomain: "test-for-you-a64af.firebaseapp.com",
+            projectId: "test-for-you-a64af",
+            storageBucket: "test-for-you-a64af.firebasestorage.app",
+            messagingSenderId: "986746967380",
+            appId: "1:986746967380:web:37f7f3465857174674a4c1",
+            measurementId: "G-3D56LTMCQD"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(app);
+
+        let questionIndex = 0;
+        const questions = [
+            "Do you want to be with me forever?",
+            "Do you think I make you happy?",
+            "Would you trust me with your life?",
+            "Do you love me more than anyone else?",
+            "Will you stay with me no matter what?"
+        ];
+
+        let answers = [];
+
+        // Function to save answers to Firestore
+        function saveData(data) {
+            db.collection("responses").add(data)
+                .then(() => {
+                    console.log("Data saved successfully!");
+                })
+                .catch((error) => {
+                    console.error("Error saving data: ", error);
+                });
+        }
+
+        function goToStart() {
+            document.getElementById('mobile-question').style.display = 'none';
+            document.getElementById('start-button').style.display = 'block';
+        }
+
+        function startQuestions() {
+            document.getElementById('start-button').style.display = 'none';
+            document.getElementById('questions').style.display = 'block';
+            updateQuestion();
+        }
+
+        function updateQuestion() {
+            if (questionIndex < questions.length) {
+                document.getElementById('question-text').innerText = questions[questionIndex];
+            } else {
+                document.getElementById('questions').style.display = 'none';
+                document.getElementById('continue-question').style.display = 'block';
+            }
+        }
+
+        function nextQuestion(answer) {
+            answers.push({ question: questions[questionIndex], answer: answer });
+            questionIndex++;
+            updateQuestion();
+        }
+
+        function goToFeedback() {
+            document.getElementById('continue-question').style.display = 'none';
+            document.getElementById('feedback-section').style.display = 'block';
+        }
+
+        function submitFeedback() {
+            const feedback = document.getElementById('feedback').value;
+            answers.push({ question: "Feedback", answer: feedback });
+
+            // Save all answers and feedback to Firestore
+            saveData({
+                responses: answers,
+                timestamp: new Date()
+            });
+
+            alert('Thank you for your message: ' + feedback);
+            closeSite();
+        }
+
+        function closeSite(message = '') {
+            if (message) alert(message);
+            setTimeout(() => window.close(), 500);
+        }
+    </script>
+</body>
+</html>
